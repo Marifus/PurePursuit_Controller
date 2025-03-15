@@ -48,7 +48,9 @@ namespace purepursuit
     void PurePursuit::OdomCallback(const nav_msgs::Odometry::ConstPtr& msg)
     {
         vehicle_odom = *msg;
-        current_heading = tf::getYaw(vehicle_odom.pose.pose.orientation);
+
+        geometry_msgs::Quaternion& q = vehicle_odom.pose.pose.orientation;
+        current_heading = atan2(2.0 * (q.w * q.z + q.x * q.y) , 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
 
         ROS_INFO("Simdiki Konum: [%f, %f]", vehicle_odom.pose.pose.position.x, vehicle_odom.pose.pose.position.y);
         ROS_INFO("Simdiki Yaw: [%f]", current_heading);
@@ -95,9 +97,12 @@ namespace purepursuit
         double tx = -1 * current_point_pose.position.x;
         double ty = -1 * current_point_pose.position.y;
 
+        geometry_msgs::Quaternion& q = current_point_pose.orientation;
+        double current_heading_ = atan2(2.0 * (q.w * q.z + q.x * q.y) , 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+/*         double current_heading_ = tf::getYaw(current_point_pose.orientation); */
+
         double target_vec[3] = {target_point_pose.position.x, target_point_pose.position.y, 1};
 
-        double current_heading_ = tf::getYaw(current_point_pose.orientation);
         double TransformationMatrix[3][3] = {
             {cos(-current_heading_), -sin(-current_heading_), cos(-current_heading_) * tx - sin(-current_heading_) * ty},
             {sin(-current_heading_), cos(-current_heading_), sin(-current_heading_) * tx + cos(-current_heading_) * ty},
