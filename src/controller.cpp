@@ -59,7 +59,7 @@ namespace purepursuit
 
     void PurePursuit::ControlOutput()
     {
-        geometry_msgs::Pose target_pose = ChooseWaypoint(vehicle_odom.pose.pose, path, lookahead_distance);
+        geometry_msgs::Pose target_pose = ChooseLookaheadPoint(vehicle_odom.pose.pose, path, lookahead_distance);
         double transformed_vec[3] = {0, 0, 0};
 
         LocalTransform(vehicle_odom.pose.pose, target_pose, transformed_vec);
@@ -99,8 +99,8 @@ namespace purepursuit
 
         double current_heading_ = tf::getYaw(current_point_pose.orientation);
         double TransformationMatrix[3][3] = {
-            {cos(current_heading_), sin(current_heading_), cos(current_heading_) * tx + sin(current_heading_) * ty},
-            {-sin(current_heading_), cos(current_heading_), -sin(current_heading_) * tx + cos(current_heading_) * ty},
+            {cos(-current_heading_), -sin(-current_heading_), cos(-current_heading_) * tx - sin(-current_heading_) * ty},
+            {sin(-current_heading_), cos(-current_heading_), sin(-current_heading_) * tx + cos(-current_heading_) * ty},
             {0.0, 0.0, 1.0}
         };
 
@@ -118,11 +118,9 @@ namespace purepursuit
     }
 
 
-    geometry_msgs::Pose PurePursuit::ChooseWaypoint(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path, double t_lookahed_distance)
+    int PurePursuit::ClosestWaypointIndex(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path)
     {
         int closest_point_index;
-        int chosen_point_index;
-        geometry_msgs::PoseStamped closest_point;
         double min_distance2;
 
         for (int i = 0; i < path.poses.size(); ++i)
@@ -147,14 +145,19 @@ namespace purepursuit
             }
         }
 
-        closest_point = path.poses[closest_point_index];
+        return closest_point_index;
+    }
 
-        chosen_point_index = closest_point_index;
+    
+    geometry_msgs::Pose PurePursuit::ChooseLookaheadPoint(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path, double t_lookahead_distance) 
+    {
+
+        int chosen_point_index = ClosestWaypointIndex(current_point_pose, path);
         geometry_msgs::PoseStamped& waypoint = path.poses[chosen_point_index];
 
         double distance = sqrt(std::pow((waypoint.pose.position.x - current_point_pose.position.x), 2) + std::pow((waypoint.pose.position.y - current_point_pose.position.y), 2));
 
-        while (lookahead_distance > distance) 
+        while (t_lookahead_distance > distance) 
         {
 
             chosen_point_index++;
@@ -196,7 +199,8 @@ namespace purepursuit
     double PurePursuit::PurePursuitAlgorithm(double target_x, double target_y, double length)
     {
         double distance2 = (target_x * target_x) + (target_y * target_y);
-        double steering = (2*target_y*length) / (distance2);
+
+        double steering = atan2((2*target_y*length), (distance2));
 
         return steering;
     }
