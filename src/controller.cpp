@@ -55,13 +55,13 @@ namespace purepursuit
         ROS_INFO("Simdiki Konum: [%f, %f]", vehicle_odom.pose.pose.position.x, vehicle_odom.pose.pose.position.y);
         ROS_INFO("Simdiki Yaw: [%f]", current_heading);
 
-        ControlOutput();
+        if (path.poses.size() != 0) ControlOutput();
     }
 
 
     void PurePursuit::ControlOutput()
     {
-        geometry_msgs::Pose target_pose = ChooseLookaheadPoint(vehicle_odom.pose.pose, path, lookahead_distance);
+        geometry_msgs::Pose target_pose = ChooseLookaheadPoint(vehicle_odom.pose.pose, path, lookahead_distance, ClosestWaypointIndex(vehicle_odom.pose.pose, path));
         double transformed_vec[3] = {0, 0, 0};
 
         LocalTransform(vehicle_odom.pose.pose, target_pose, transformed_vec);
@@ -154,21 +154,23 @@ namespace purepursuit
     }
 
     
-    geometry_msgs::Pose PurePursuit::ChooseLookaheadPoint(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path, double t_lookahead_distance) 
+    geometry_msgs::Pose PurePursuit::ChooseLookaheadPoint(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path, double t_lookahead_distance, int closest_point_index) 
     {
 
-        int chosen_point_index = ClosestWaypointIndex(current_point_pose, path);
+        int chosen_point_index = closest_point_index;
         geometry_msgs::PoseStamped& waypoint = path.poses[chosen_point_index];
 
         double distance = sqrt(std::pow((waypoint.pose.position.x - current_point_pose.position.x), 2) + std::pow((waypoint.pose.position.y - current_point_pose.position.y), 2));
 
         while (t_lookahead_distance > distance) 
-        {
-
+        {  
             chosen_point_index++;
+            if (chosen_point_index<path.poses.size()) 
+            {
             geometry_msgs::PoseStamped& waypoint = path.poses[chosen_point_index];
             distance = sqrt(std::pow((waypoint.pose.position.x - current_point_pose.position.x), 2) + std::pow((waypoint.pose.position.y - current_point_pose.position.y), 2));
-
+            }
+            else break;
         }
 
         chosen_point_index--;

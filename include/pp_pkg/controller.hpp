@@ -35,7 +35,7 @@ namespace purepursuit {
         void ControlOutput();
         void LocalTransform(geometry_msgs::Pose& current_point_pose, geometry_msgs::Pose& target_point_pose, double transformed_vector[3]);
         int ClosestWaypointIndex(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path);
-        geometry_msgs::Pose ChooseLookaheadPoint(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path, double t_lookahead_distance);
+        geometry_msgs::Pose ChooseLookaheadPoint(geometry_msgs::Pose& current_point_pose, nav_msgs::Path& path, double t_lookahead_distance, int closest_point_index);
         double PurePursuitAlgorithm(double target_x, double target_y, double length);
 
         public:
