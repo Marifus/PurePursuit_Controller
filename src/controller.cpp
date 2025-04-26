@@ -12,8 +12,8 @@ namespace purepursuit
             ros::requestShutdown();
         }
 
-        path_sub = nh_.subscribe("/odom", 10, &PurePursuit::PathCallback, this);
-        odom_sub = nh_.subscribe("/odom_sim", 10, &PurePursuit::OdomCallback, this);
+        path_sub = nh_.subscribe("/shortest_path", 10, &PurePursuit::PathCallback, this);
+        odom_sub = nh_.subscribe("/odom", 10, &PurePursuit::OdomCallback, this);
         ctrl_pub = nh_.advertise<autoware_msgs::VehicleCmd>("/vehicle_cmd", 10);
         path_pub = nh_.advertise<nav_msgs::Path>("/path", 10);        
 
@@ -70,15 +70,15 @@ namespace purepursuit
 
         double steering_angle_degree = steering_angle * (180 / M_PI);
 
-        if (steering_angle_degree > 50) {
+        if (steering_angle_degree > 100) {
 
-            steering_angle = 50 * (M_PI / 180);
+            steering_angle = 100 * (M_PI / 180);
 
         }
 
-        if (steering_angle_degree < -50) {
+        if (steering_angle_degree < -100) {
 
-            steering_angle = -50 * (M_PI / 180);
+            steering_angle = -100 * (M_PI / 180);
 
         }
 
