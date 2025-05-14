@@ -1,2 +1,4 @@
-lookahead_distance: 1.5
-bicycle_length: 1.25
+lookahead_distance: 2.0
+axle_length: 0.9842
+input_log: false
+output_log: false

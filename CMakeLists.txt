@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   geometry_msgs
   roscpp
+  tf2
 )
 
 ## System dependencies are found with CMake's conventions
@@ -152,8 +153,8 @@ include_directories(
 # )
 
 
-add_executable(controller_node src/controller_node.cpp src/controller.cpp)
-target_link_libraries(controller_node
+add_executable(pp_node src/controller_node.cpp src/controller.cpp)
+target_link_libraries(pp_node
   ${catkin_LIBRARIES}
 )
 
